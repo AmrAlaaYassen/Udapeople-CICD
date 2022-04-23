@@ -189,7 +189,6 @@ jobs:
           fingerprints: ["cc:65:a8:08:79:de:3c:3a:0a:a2:c3:08:21:7a:59:f7"]
       - attach_workspace:
           at: .circleci/ansible/
-      - install-aws
       - run:
           name: Install dependencies
           command: |
@@ -209,7 +208,6 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - install-aws
       - run:
           name: Run migrations
           command: |
@@ -224,6 +222,7 @@ jobs:
                 echo "DB migration was successful, Updating KVDB..."
                 curl https://kvdb.io/TmyVT1seD1wBzaL4MkbDo5/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
             fi
+      - install-aws
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
