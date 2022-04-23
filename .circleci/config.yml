@@ -1,6 +1,17 @@
 version: 2.1
 
 commands:
+  install-aws:
+    description: Install aws cli
+    steps:
+      - run:
+          name: Install AWS CLI dependencies
+          working_directory: /tmp
+          command: |
+            sudo apt-get update && sudo apt-get install -yy less
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
@@ -178,6 +189,7 @@ jobs:
           fingerprints: ["cc:65:a8:08:79:de:3c:3a:0a:a2:c3:08:21:7a:59:f7"]
       - attach_workspace:
           at: .circleci/ansible/
+      - install-aws
       - run:
           name: Install dependencies
           command: |
@@ -197,6 +209,7 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - install-aws
       - run:
           name: Run migrations
           command: |
