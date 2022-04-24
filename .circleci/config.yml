@@ -309,7 +309,7 @@ jobs:
             cat .circleci/ansible/inventory.txt
             ansible-playbook -i ./circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yaml -vv
       - destroy-environment:
-          id: ${CIRCLE_WORKFLOW_ID:0:7}
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       # Here's where you will add some code to rollback on failure
