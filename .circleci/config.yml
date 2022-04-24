@@ -37,6 +37,7 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
+            cd backend
             pwd
             ls -la
             npm run migrations:revert
@@ -44,6 +45,7 @@ commands:
             echo $SUCCESS
             if [[ "$SUCCESS" == "success" ]]
             then
+              cd backend
               pwd
               ls -la
               npm run migrations:revert
@@ -294,7 +296,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["cc:65:a8:08:79:de:3c:3a:0a:a2:c3:08:21:7a:59:f7"]
       - attach_workspace:
-          at: .circleci/ansible
+          at: .circleci/ansible/
       - run:
           name: Install dependencies
           command: |
@@ -313,7 +315,7 @@ jobs:
             mkdir -p .circleci/ansible/roles/deploy/files/
             mv artifact-backend.tar.gz .circleci/ansible/roles/deploy/files/
             cd .circleci/ansible
-            ansible-playbook -i inventory.txt deploy-backend.yml -vv
+            ansible-playbook -i inventory.txt deploy-backend.yml 
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - revert-migrations:
