@@ -1,6 +1,6 @@
 - name: extract backend artifacts
   unarchive:
-    src: artifact.tar.gz
+    src: artifact-backend.tar.gz
     dest: ~/
 
 - name: Start backend
