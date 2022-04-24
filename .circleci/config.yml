@@ -37,10 +37,6 @@ commands:
           name: Revert migrations
           when: on_fail
           command: |
-            cd backend
-            pwd
-            ls -la
-            npm run migrations:revert
             SUCCESS=$(curl --insecure  https://kvdb.io/TmyVT1seD1wBzaL4MkbDo5/migration_<< parameters.workflow_id >>)
             echo $SUCCESS
             if [[ "$SUCCESS" == "success" ]]
