@@ -220,8 +220,6 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - attach_workspace:
-          at: .
       - restore_cache:
           keys:
             - backend-build
@@ -247,12 +245,15 @@ jobs:
       - run:
           name: Send migration results to kvdb
           command: |
-            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            cat ./backend/migrations_dump.txt
+            if grep -q "has been executed successfully" ./backend/migrations_dump.txt
             then
                 echo "DB migration was successful, Updating KVDB..."
                 curl --insecure -v https://kvdb.io/TmyVT1seD1wBzaL4MkbDo5/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d 'success'
             fi
       - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - revert-migrations:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
   deploy-frontend:
@@ -261,7 +262,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: .
+          at: .circleci/ansible
       - aws-cli
       - run:
           name: Get backend url
@@ -290,7 +291,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["cc:65:a8:08:79:de:3c:3a:0a:a2:c3:08:21:7a:59:f7"]
       - attach_workspace:
-          at: .
+          at: .circleci/ansible
       - run:
           name: Install dependencies
           command: |
@@ -308,8 +309,8 @@ jobs:
             tar -C backend -czvf artifact-backend.tar.gz .
             mkdir -p .circleci/ansible/roles/deploy/files/
             mv artifact-backend.tar.gz .circleci/ansible/roles/deploy/files/
-            cat .circleci/ansible/inventory.txt
-            ansible-playbook -i ./circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml -vv
+            cd .circleci/ansible
+            ansible-playbook -i inventory.txt deploy-backend.yml -vv
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - revert-migrations:
@@ -352,8 +353,8 @@ jobs:
             else
               exit 1
             fi
-      # - destroy-environment:
-      #     workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      - destroy-environment:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - revert-migrations:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 #   cloudfront-update:
