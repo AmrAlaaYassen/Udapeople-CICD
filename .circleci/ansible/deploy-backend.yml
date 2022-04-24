@@ -1,6 +1,6 @@
 ---
 - name: Start udapeople backend server
-  hosts: web
+  hosts: all
   user: ubuntu
   gather_facts: false
   vars:
