@@ -155,14 +155,15 @@ jobs:
             --template-file .circleci/files/backend.yml \
             --stack-name "udapeople-api-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
-            --tags project=udapeople
+            --tags project=udapeople-api-${CIRCLE_WORKFLOW_ID:0:7}
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            aws cloudformation describe-stacks \
-            --stack-name "udapeople-api-${CIRCLE_WORKFLOW_ID:0:7}" \
-            --query "Stacks[0].Outputs[0].OutputValue" \
-            --output text >> .circleci/ansible/inventory.txt
+            aws ec2 describe-instances \
+              --query 'Reservations[*].Instances[*].PublicIpAddress' \
+              --filters "Name=tag:project,Values=udapeople-api-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --output text >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: .
           paths:
@@ -186,7 +187,7 @@ jobs:
             --template-file .circleci/files/frontend.yml \
             --stack-name "udapeople-front-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
-            --tags project=udapeople
+            --tags project=udapeople-front
 
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
@@ -264,8 +265,8 @@ jobs:
       - run:
           name: Get backend url
           command: |
-            BACKEND_IP=$(aws cloudformation describe-stacks --stack-name udapeople-api-"${CIRCLE_WORKFLOW_ID:0:7}" --query "Stacks[0].Outputs[0].OutputValue" --output text)
-            API_URL="http://${BACKEND_IP}:3030"
+            BACKEND_SERVER=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-api-${CIRCLE_WORKFLOW_ID:0:7}" --output text )
+            API_URL="http://${BACKEND_SERVER}:3030"
             echo "API_URL=${API_URL}" >> frontend/.env
       - run:
           name: Deploy frontend objects
@@ -330,7 +331,7 @@ jobs:
       - run:
           name: Backend Smoke Test
           command: |
-            BACKEND_SERVER=$(aws cloudformation describe-stacks --stack-name udapeople-api-"${CIRCLE_WORKFLOW_ID:0:7}" --query "Stacks[0].Outputs[0].OutputValue" --output text)
+            BACKEND_SERVER=$(aws ec2 describe-instances --query 'Reservations[*].Instances[*].PublicIpAddress' --filters "Name=tag:project,Values=udapeople-api-${CIRCLE_WORKFLOW_ID:0:7}" --output text )
             API="http://${BACKEND_SERVER}:3030"
             echo "API URL: ${API}"
             if curl "${API}/api/status" | grep "ok"
