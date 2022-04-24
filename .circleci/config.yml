@@ -299,10 +299,14 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            cat .circleci/ansible/inventory.txt
+            cd backend
+            npm i
+            npm run build 
+            cd ..
             tar -C backend artifact-backend.tar.gz .
             mkdir -p .circleci/ansible/roles/deploy/files/
             mv artifact.tar.gz .circleci/ansible/roles/deploy/files/
+            cat .circleci/ansible/inventory.txt
             ansible-playbook -i ./circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yaml -vv
       - destroy_environment:
           id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -381,12 +385,12 @@ workflows:
       - scan-frontend:
           requires: [build-frontend]
       - deploy-backend-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          requires: [test-backend, scan-backend]
           filters:
             branches:
               only: [main]
       - deploy-frontend-infrastructure:
-          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          requires: [test-frontend, scan-frontend]
           filters:
             branches:
               only: [main]
@@ -397,8 +401,8 @@ workflows:
           requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
-      # - deploy-backend:
-      #     requires: [run-migrations]
+      - deploy-backend:
+          requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
