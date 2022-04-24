@@ -156,15 +156,6 @@ jobs:
             --stack-name "udapeople-api-${CIRCLE_WORKFLOW_ID:0:7}" \
             --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
             --tags project=udapeople
-
-      # - run:
-      #     name: provision frontend Infrastructure
-      #     command: |
-      #       aws cloudformation deploy \
-      #       --template-file .circleci/files/frontend.yml \
-      #       --stack-name "udapeople-front-${CIRCLE_WORKFLOW_ID:0:7}" \
-      #       --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  \
-      #       --tags project=udapeople
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -178,6 +169,7 @@ jobs:
             - inventory.txt
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+
   deploy-frontend-infrastructure:
     docker:
       - image: amazon/aws-cli
@@ -187,7 +179,6 @@ jobs:
           name: Install tar Utility
           command: |
             yum install -y tar gzip
-
       - run:
           name: provision frontend Infrastructure
           command: |
@@ -282,30 +273,42 @@ jobs:
             cd frontend
             npm install
             npm run build
-            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
+            tar -czvf artifact-front-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
       - revert-migrations:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
-      # Here's where you will add some code to rollback on failure
 
-#   deploy-backend:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Deploy backend
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure
+  deploy-backend:
+    docker:
+      - image: python:3.9.0-alpine
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints: ["cc:65:a8:08:79:de:3c:3a:0a:a2:c3:08:21:7a:59:f7"]
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --update ansible curl rsync openssh nodejs npm tar gzip
+            ansible --version
+            pip install awscli
+            aws --version
+      - run:
+          name: Deploy backend
+          command: |
+            cat .circleci/ansible/inventory.txt
+            tar -C backend artifact-backend.tar.gz .
+            mkdir -p .circleci/ansible/roles/deploy/files/
+            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/
+            ansible-playbook -i ./circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yaml -vv
+      - destroy_environment:
+          id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
+      # Here's where you will add some code to rollback on failure
 
 #   smoke-test:
 #     docker:
@@ -388,7 +391,8 @@ workflows:
             branches:
               only: [main]
       - configure-infrastructure:
-          requires: [deploy-backend-infrastructure, deploy-frontend-infrastructure]
+          requires:
+            [deploy-backend-infrastructure, deploy-frontend-infrastructure]
       - run-migrations:
           requires: [configure-infrastructure]
       - deploy-frontend:
