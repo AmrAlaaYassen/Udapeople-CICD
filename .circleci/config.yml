@@ -307,7 +307,7 @@ jobs:
             mkdir -p .circleci/ansible/roles/deploy/files/
             mv artifact-backend.tar.gz .circleci/ansible/roles/deploy/files/
             cat .circleci/ansible/inventory.txt
-            ansible-playbook -i ./circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yaml -vv
+            ansible-playbook -i ./circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yml -vv
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - revert-migrations:
