@@ -305,7 +305,7 @@ jobs:
             cd ..
             tar -C backend -czvf artifact-backend.tar.gz .
             mkdir -p .circleci/ansible/roles/deploy/files/
-            mv artifact.tar.gz .circleci/ansible/roles/deploy/files/
+            mv artifact-backend.tar.gz .circleci/ansible/roles/deploy/files/
             cat .circleci/ansible/inventory.txt
             ansible-playbook -i ./circleci/ansible/inventory.txt .circleci/ansible/deploy-backend.yaml -vv
       - destroy-environment:
