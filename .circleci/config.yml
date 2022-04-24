@@ -210,7 +210,7 @@ jobs:
           name: Configure server
           command: |
             cd .circleci/ansible/
-            ansible-playbook configure-server.yml
+            ansible-playbook -i inventory.txt configure-server.yml
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
@@ -249,7 +249,7 @@ jobs:
             if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
             then
                 echo "DB migration was successful, Updating KVDB..."
-                curl --insecure https://kvdb.io/TmyVT1seD1wBzaL4MkbDo5/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d 'success'
+                curl --insecure -v https://kvdb.io/TmyVT1seD1wBzaL4MkbDo5/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d 'success'
             fi
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
