@@ -27,7 +27,8 @@ commands:
               --stack-name "udapeople-api-<< parameters.workflow_id >>"
             aws s3 rm "s3://udapeople-<< parameters.workflow_id >>" --recursive
 
-  revert-migrations:environmentworkflow.
+  revert-migrations:
+    description: Revert the last migration if successfully run in the current workflow.
     parameters:
       workflow_id:
         type: string
