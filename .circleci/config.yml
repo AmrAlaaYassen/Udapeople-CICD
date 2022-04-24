@@ -315,7 +315,7 @@ jobs:
             tar -C backend -czvf artifact-backend.tar.gz .
             mkdir -p .circleci/ansible/roles/deploy/files/
             mv artifact-backend.tar.gz .circleci/ansible/roles/deploy/files/
-            cd .circleci/ansible
+            cd .circleci/ansible/
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
