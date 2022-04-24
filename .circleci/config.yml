@@ -27,8 +27,7 @@ commands:
               --stack-name "udapeople-api-<< parameters.workflow_id >>"
             aws s3 rm "s3://udapeople-<< parameters.workflow_id >>" --recursive
 
-  revert-migrations:
-    description: Revert the last migration if successfully run in the current workflow.
+  revert-migrations:environmentworkflow.
     parameters:
       workflow_id:
         type: string
@@ -199,6 +198,7 @@ jobs:
           command: |
             cd .circleci/ansible/
             ansible-playbook configure-server.yml
+      - aws-cli
       - destroy-environment:
           workflow_id: "${CIRCLE_WORKFLOW_ID:0:7}"
 
