@@ -393,7 +393,7 @@ jobs:
             oldWorkflowId=$(curl --insecure  https://kvdb.io/TmyVT1seD1wBzaL4MkbDo5/oldworkflow)
             echo "${oldWorkflowId}"
             # put new workflow id 
-            curl --insecure -v https://kvdb.io/TmyVT1seD1wBzaL4MkbDo5/oldworkflow  -d "${CIRCLE_WORKFLOW_ID:0:7}"
+            curl --insecure  https://kvdb.io/TmyVT1seD1wBzaL4MkbDo5/oldworkflow  -d "${CIRCLE_WORKFLOW_ID:0:7}"
             export oldWorkflowId=oldWorkflowId
             # export oldWorkflowId=$(aws cloudformation \
             # list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
@@ -407,6 +407,7 @@ jobs:
           name: Remove old stacks and files
           command: |
             echo "will delete old version"
+            echo "${oldWorkflowId}"
             aws s3 rm "s3://udapeople-${oldWorkflowId}" --recursive
             aws cloudformation delete-stack --stack-name "udapeople-front-${oldWorkflowId}"
             aws cloudformation delete-stack --stack-name "udapeople-api-${oldWorkflowId}"
