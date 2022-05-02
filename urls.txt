@@ -1,0 +1,2 @@
+[cloudfront]
+http://d3h6peu73om6dz.cloudfront.net/#/employees
